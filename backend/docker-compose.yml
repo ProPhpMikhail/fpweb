@@ -1,0 +1,31 @@
+version: '3.8'
+services:
+  fp_db:
+    image: postgres:latest
+    container_name: fp_db
+    environment:
+      POSTGRES_DB: finplan
+      POSTGRES_USER: psqladmin
+      POSTGRES_PASSWORD: qweasd123
+    ports:
+      - "5431:5432"
+    volumes:
+      - ./postgres:/var/lib/postgresql/data
+#  fp_java:
+#    image: openjdk:17-jdk-alpine
+#    container_name: fp_java
+#    ports:
+#      - "8080:8080"
+#    volumes:
+#      - ./target/finplan-0.0.1-SNAPSHOT.jar:/app/finplan.jar
+#    command: [ "java", "-jar", "/app/finplan.jar" ]
+#    depends_on:
+#      - fp_db
+
+  fp_java:
+    build: .
+    container_name: fp_java
+    ports:
+      - "8080:8080"
+    depends_on:
+        - fp_db

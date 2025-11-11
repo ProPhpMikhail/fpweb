@@ -1,0 +1,28 @@
+---
+logging:
+  level:
+    root: WARN
+
+spring:
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    url: jdbc:postgresql://fp_db:5432/finplan
+    username: psqladmin
+    password: qweasd123
+  jpa:
+    generate-ddl: true
+    show-sql: true
+    hibernate:
+      ddl-auto: update
+  output:
+    ansi:
+      enabled: always
+
+server:
+  address: 0.0.0.0
+  port: 8080
+
+user:
+  username: admin
+  password: admin123
+  email: admin@gmail.com

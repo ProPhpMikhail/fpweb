@@ -1,0 +1,14 @@
+version: '3'
+services:
+    vue-app:
+        build: .
+        container_name: fp_vue
+        ports:
+            - "80:8080"  # Прокси-порт 8080 из контейнера на порт хоста
+        volumes:
+            - .:/app  # Монтируем текущую директорию в контейнер
+            - /app/node_modules # Исключаем node_modules из монтирования
+        command: npm run serve  # Запуск приложения на сервере разработки
+        environment:
+            - NODE_ENV=development
+        working_dir: /app  # Рабочая директория внутри контейнера
