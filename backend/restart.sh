@@ -1,4 +1,5 @@
 #!/bin/sh
-docker-compose down
+set -e
 mvn clean package -DskipTests
-docker-compose up --build -d
+cd ..
+docker compose up --build db backend

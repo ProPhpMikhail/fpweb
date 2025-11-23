@@ -1,4 +1,3 @@
----
 logging:
   level:
     root: WARN
@@ -6,14 +5,16 @@ logging:
 spring:
   datasource:
     driver-class-name: org.postgresql.Driver
-    url: jdbc:postgresql://fp_db:5432/finplan
+    url: jdbc:postgresql://db:5432/finplan
     username: psqladmin
     password: qweasd123
   jpa:
-    generate-ddl: true
     show-sql: true
     hibernate:
-      ddl-auto: update
+      ddl-auto: none
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
   output:
     ansi:
       enabled: always

@@ -1,0 +1,34 @@
+services:
+  db:
+    image: postgres:16
+    container_name: fp_db
+    environment:
+      POSTGRES_DB: finplan
+      POSTGRES_USER: psqladmin
+      POSTGRES_PASSWORD: qweasd123
+    ports:
+      - "5431:5432"
+    volumes:
+      - ./postgres:/var/lib/postgresql/data
+
+  backend:
+    build: ./backend
+    container_name: fp_java
+    ports:
+      - "8080:8080"
+    depends_on:
+      - db
+
+  frontend:
+    build: ./frontend
+    container_name: fp_vue
+    working_dir: /app
+    command: npm run serve -- --host 0.0.0.0
+    environment:
+      - NODE_ENV=development
+    ports:
+      - "80:8080"
+    volumes:
+      - ./frontend:/app
+    depends_on:
+      - backend

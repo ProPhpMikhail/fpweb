@@ -1,14 +1,17 @@
 {
-    "name": "my-vue-project",
+    "name": "fp-vue",
     "version": "1.0.0",
     "scripts": {
         "serve": "vue-cli-service serve",
         "build": "vue-cli-service build"
     },
     "dependencies": {
+        "@vue/compat": "^3.1.0",
         "axios": "^1.4.0",
+        "moment": "^2.30.1",
         "vue": "^3.5.13",
-        "@vue/compat": "^3.1.0"
+        "vue-router": "^4.6.3",
+        "vue3-google-map": "^0.25.1"
     },
     "devDependencies": {
         "@vue/cli-service": "^5.0.0"
