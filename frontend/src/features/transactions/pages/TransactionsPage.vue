@@ -6,7 +6,7 @@
         <p class="page-subtitle">Учет движений по счетам</p>
       </div>
 
-      <div class="page-actions">
+      <div class="page-actions" v-if="accounts.length">
         <button class="btn btn-primary" @click="openCreate">Add transaction</button>
       </div>
     </header>
@@ -119,7 +119,7 @@ onMounted(async () => {
 watch(
     () => route.query,
     (q) => {
-      page.value = Number(q.page ?? 0);
+      page.value = Number(q.page ?? 1);
       size.value = Number(q.size ?? 10);
       load(page.value, size.value);
     }
@@ -177,12 +177,12 @@ function onAdd(payload) {
     longitude: payload.longitude,
   });
   closeCreate();
-  setPage(0);
+  setPage(1);
 }
 
 function onDelete(payload) {
   deleteTransactionById(payload.id);
-  setPage(0);
+  setPage(1);
 }
 
 function onUpdate(payload) {
@@ -228,7 +228,7 @@ async function getUserLocation() {
 }
 
 async function setPage(newPage) {
-  if (newPage < 0) return;
+  if (newPage < 1) return;
   if (totalPages.value && newPage >= totalPages.value) return;
   await load(newPage, size.value);
   router.replace({

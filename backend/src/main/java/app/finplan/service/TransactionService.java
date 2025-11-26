@@ -7,9 +7,12 @@ import app.finplan.mapper.TransactionMapper;
 import app.finplan.model.Account;
 import app.finplan.model.Category;
 import app.finplan.model.Transaction;
+import app.finplan.model.User;
 import app.finplan.repositories.AccountRepository;
 import app.finplan.repositories.CategoryRepository;
 import app.finplan.repositories.TransactionRepository;
+import app.finplan.repositories.UserRepository;
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -17,22 +20,14 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
-
 @Service
+@RequiredArgsConstructor
 public class TransactionService {
     private final TransactionRepository txRepo;
-
+    private final UserRepository userRepo;
     private final AccountRepository accRepo;
     private final CategoryRepository catRepo;
     private final TransactionMapper txMapper;
-
-    public TransactionService(TransactionRepository txRepo, AccountRepository accRepo, CategoryRepository catRepo, TransactionMapper txMapper) {
-        this.txRepo = txRepo;
-        this.accRepo = accRepo;
-        this.catRepo = catRepo;
-        this.txMapper = txMapper;
-    }
 
     public Page<TransactionDTO> list(int page, int limit) {
         Pageable pageable = PageRequest.of(page, limit, Sort.by("createdAt").descending());
@@ -42,15 +37,27 @@ public class TransactionService {
         return txPage.map(txMapper::map);
     }
 
+    public Page<TransactionDTO> list(Long userId, int page, int limit) {
+        Pageable pageable = PageRequest.of(page, limit, Sort.by("createdAt").descending());
+
+        Page<Transaction> txPage = txRepo.findByUserId(userId, pageable);
+
+        return txPage.map(txMapper::map);
+    }
+
     @Transactional
-    public TransactionDTO create(TransactionCreateDTO dto) {
-        Account acc = accRepo.findById(dto.getAccountId())
+    public TransactionDTO create(Long userId, TransactionCreateDTO dto) {
+        User user = userRepo.findById(userId).orElseThrow(
+                () -> new NotFoundException("User not found: " + userId)
+        );
+        Account acc = accRepo.findByIdAndUserId(dto.getAccountId(), userId)
                 .orElseThrow(() -> new NotFoundException("Account not found: " + dto.getAccountId()));
         Transaction tx = new Transaction();
         txMapper.create(dto, tx);
         tx.setAccount(acc);
+        tx.setUser(user);
         if (dto.getCategoryId() != null) {
-            Category cat = catRepo.findById(dto.getCategoryId())
+            Category cat = catRepo.findByIdAndUserId(dto.getCategoryId(), userId)
                     .orElseThrow(() -> new NotFoundException("Category not found: " + dto.getCategoryId()));
             tx.setCategory(cat);
         }
@@ -63,8 +70,8 @@ public class TransactionService {
     }
 
     @Transactional
-    public TransactionDTO update(Long id, TransactionUpdateDTO dto) {
-        Transaction tx = txRepo.findById(id)
+    public TransactionDTO update(Long id, Long userId, TransactionUpdateDTO dto) {
+        Transaction tx = txRepo.findByIdAndUserId(id, userId)
                 .orElseThrow(() -> new NotFoundException("Transaction not found: " + id));
         if (dto.getCategoryId() != null) {
             Category cat = catRepo.findById(dto.getCategoryId())
@@ -85,8 +92,8 @@ public class TransactionService {
     }
 
     @Transactional
-    public Long delete(Long id) {
-        Transaction tx = txRepo.findById(id)
+    public Long delete(Long userId, Long id) {
+        Transaction tx = txRepo.findByIdAndUserId(userId, id)
                 .orElseThrow(() -> new NotFoundException("Transaction not found: " + id));
         Account acc = tx.getAccount();
 

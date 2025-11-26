@@ -8,9 +8,14 @@ import app.finplan.exception.ResourceException;
 import app.finplan.mapper.AccountMapper;
 import app.finplan.model.Account;
 import app.finplan.model.Transaction;
+import app.finplan.model.User;
 import app.finplan.repositories.AccountRepository;
 import app.finplan.repositories.TransactionRepository;
+import app.finplan.repositories.UserRepository;
+import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,35 +23,39 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 
 @Service
+@RequiredArgsConstructor
 public class AccountService {
     private final AccountRepository accRepo;
+    private final UserRepository userRepo;
     private final TransactionRepository txRepo;
 
     private final AccountMapper accMapper;
 
-    public AccountService(AccountRepository accRepo, TransactionRepository txRepo, AccountMapper accMapper) {
-        this.accRepo = accRepo;
-        this.txRepo = txRepo;
-        this.accMapper = accMapper;
+    public Page<AccountDTO> list(int page, int limit) {
+        Pageable pageable = PageRequest.of(page, limit, Sort.by("sort").ascending());
+        return accRepo.findAll(pageable).map(accMapper::map);
     }
 
-    public List<AccountDTO> list(int page, int limit) {
-        Sort sort = Sort.by(Sort.Order.asc("sort"));
-        PageRequest pageRequest = PageRequest.of(page - 1, limit, sort);
-        return accRepo.findAll(pageRequest).stream().map(accMapper::map).toList();
+    public Page<AccountDTO> list(Long userId, int page, int limit) {
+        Pageable pageable = PageRequest.of(page, limit, Sort.by("sort").ascending());
+        return accRepo.findByUserId(userId, pageable).map(accMapper::map);
     }
 
     @Transactional
-    public AccountDTO create(AccountCreateDTO dto) {
+    public AccountDTO create(Long userId, AccountCreateDTO dto) {
+        User user = userRepo.findById(userId).orElseThrow(
+                () -> new NotFoundException("User not found: " + userId)
+        );
         Account acc = new Account();
         accMapper.create(dto, acc);
+        acc.setUser(user);
         acc = accRepo.save(acc);
         return accMapper.map(acc);
     }
 
     @Transactional
-    public AccountDTO update(Long id, AccountUpdateDTO dto) {
-        Account acc = accRepo.findById(id)
+    public AccountDTO update(Long id, Long userId, AccountUpdateDTO dto) {
+        Account acc = accRepo.findByIdAndUserId(id, userId)
                 .orElseThrow(() -> new NotFoundException("Account not found: " + id));
         accMapper.update(dto, acc);
         acc = accRepo.save(acc);
@@ -57,8 +66,8 @@ public class AccountService {
     }
 
     @Transactional
-    public Long delete(Long id) {
-        Account acc = accRepo.findById(id)
+    public Long delete(Long userId, Long id) {
+        Account acc = accRepo.findByIdAndUserId(id, userId)
                 .orElseThrow(() -> new NotFoundException("Account not found: " + id));
         List<Transaction> transactions = txRepo.findByAccountId(id);
         transactions.forEach(txRepo::delete);

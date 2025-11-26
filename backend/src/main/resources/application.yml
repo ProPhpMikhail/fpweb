@@ -18,6 +18,14 @@ spring:
   output:
     ansi:
       enabled: always
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: thebestrubl@gmail.com
+    password: jfvepevwqcgvjeio
+    properties:
+      mail.smtp.auth: true
+      mail.smtp.starttls.enable: true
 
 server:
   address: 0.0.0.0
@@ -27,3 +35,10 @@ user:
   username: admin
   password: admin123
   email: admin@gmail.com
+security:
+  jwt:
+    secret: "FIowbZJvKvlRGEWYMkWQLgYASODBbiMt"
+    expiration-ms: 86400000
+app:
+  mail:
+    from: no-reply@finplan.local

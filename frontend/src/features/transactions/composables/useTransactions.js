@@ -26,7 +26,7 @@ export function useTransactions() {
     const error = ref(null);
     const message = ref('');
     const messageOk = ref(null);
-    const page = ref( Number(route.query.page ?? 0) );
+    const page = ref( Number(route.query.page ?? 1) );
     const size = ref( Number(route.query.size ?? 3) );
     const totalPages = ref( Number(0) );
     const totalElements = ref( Number(0) );
@@ -41,19 +41,21 @@ export function useTransactions() {
         messageOk.value = false;
     }
     
-    async function load(pageArg = 0, sizeArg = 10) {
+    async function load(pageArg = 1, sizeArg = 10) {
         loading.value = true;
         error.value = null;
         try {
-            accounts.value = await listAccounts();
-            categories.value = await listCategories();
+            const accountData = await listAccounts();
+            accounts.value = accountData.content;
+            const categoriesData = await listCategories();
+            categories.value = categoriesData.content;
             if (!selectAccountId.value && accounts.value.length) {
                 selectAccountId.value = accounts.value[0].id;
             }
             if (accounts.value.length) {
                 const data = await listTransactions(pageArg, sizeArg);
                 transactions.value = data.content || [];
-                page.value = data.number;
+                page.value = data.number + 1;
                 size.value = data.size;
                 totalPages.value = data.totalPages;
                 totalElements.value = data.totalElements;

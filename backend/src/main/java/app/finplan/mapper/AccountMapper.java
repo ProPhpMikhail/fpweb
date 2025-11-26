@@ -14,6 +14,8 @@ import org.mapstruct.*;
 )
 public abstract class AccountMapper {
     public abstract Account map(AccountCreateDTO dto);
+
+    @Mapping(target = "userId", source = "model.user.id")
     public abstract AccountDTO map(Account model);
     public abstract void update(AccountUpdateDTO dto, @MappingTarget Account model);
     public abstract void create(AccountCreateDTO dto, @MappingTarget Account model);

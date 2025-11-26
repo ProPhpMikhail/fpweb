@@ -1,10 +1,20 @@
 import axios from 'axios';
 
-export const http = axios.create({
+const http = axios.create({
     baseURL: '/api',
     timeout: 10000,
     withCredentials: false,
 });
+
+http.interceptors.request.use((config) => {
+    const token = localStorage.getItem('token');
+    if (token) {
+        config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+});
+
+export { http };
 
 function normalizeError(error) {
     if (!error.response) {

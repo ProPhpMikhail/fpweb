@@ -12,6 +12,8 @@ import java.time.LocalDateTime;
 @Setter
 public class TransactionDTO {
     private Long id;
+    @NotNull
+    Long userId;
     @NotBlank
     String name;
     String accountName = "";

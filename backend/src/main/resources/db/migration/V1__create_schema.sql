@@ -1,5 +1,14 @@
+CREATE TABLE users (
+    id          BIGSERIAL PRIMARY KEY,
+    email       VARCHAR(255) NOT NULL UNIQUE,
+    code        VARCHAR(255),
+    password    VARCHAR(255) NOT NULL,
+    role        VARCHAR(50)  NOT NULL
+);
+
 CREATE TABLE accounts (
   id       BIGSERIAL PRIMARY KEY,
+  user_id  BIGINT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
   name     VARCHAR(100) NOT NULL,
   sort     INT DEFAULT 1,
   currency VARCHAR(3)   NOT NULL DEFAULT 'RUB',
@@ -9,12 +18,14 @@ CREATE TABLE accounts (
 
 CREATE TABLE categories (
   id          BIGSERIAL PRIMARY KEY,
+  user_id     BIGINT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
   sort        INT DEFAULT 1,
   name        VARCHAR(255) NOT NULL
 );
 
 CREATE TABLE transactions (
   id           BIGSERIAL PRIMARY KEY,
+  user_id      BIGINT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
   account_id   BIGINT NOT NULL REFERENCES accounts(id) ON DELETE CASCADE,
   category_id  BIGINT REFERENCES categories(id),
   sort         INT DEFAULT 1,
@@ -27,6 +38,7 @@ CREATE TABLE transactions (
 
 CREATE TABLE transfers (
   id               BIGSERIAL PRIMARY KEY,
+  user_id          BIGINT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
   from_account_id  BIGINT NOT NULL REFERENCES accounts(id) ON DELETE CASCADE,
   from_amount      NUMERIC(14,2) NOT NULL,
   to_account_id    BIGINT NOT NULL REFERENCES accounts(id) ON DELETE CASCADE,
@@ -37,6 +49,7 @@ CREATE TABLE transfers (
 
 CREATE TABLE plans (
   id           BIGSERIAL PRIMARY KEY,
+  user_id      BIGINT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
   name         VARCHAR(255) NOT NULL,
   sort         INT DEFAULT 1,
   account_id   BIGINT NOT NULL REFERENCES accounts(id) ON DELETE CASCADE,

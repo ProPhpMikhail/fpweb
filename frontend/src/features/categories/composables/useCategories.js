@@ -29,7 +29,8 @@ export function useCategories() {
         loading.value = true;
         error.value = null;
         try {
-            categories.value = await listCategories();
+            const data = await listCategories();
+            categories.value = data.content;
             showOk('Данные загружены');
         } catch (e) {
             console.error(e);

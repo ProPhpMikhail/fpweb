@@ -1,8 +1,10 @@
 import { http } from './http';
 import { unwrapSuccess } from './helpers';
 
-export async function listAccounts(params = {}) {
-    const res = await http.get('/accounts', { params });
+export async function listAccounts(page = 1, size = 1000) {
+    const res = await http.get('/accounts', {
+        params: { page, size },
+    });
     return unwrapSuccess(res);
 }
 

@@ -1,17 +1,6 @@
 <template>
   <div id="app" style="text-align: center">
-    <nav class="navbar">
-      <router-link to="/transactions" class="nav-link">
-        Transactions
-      </router-link>
-      <router-link to="/accounts" class="nav-link">
-        Accounts
-      </router-link>
-      <router-link to="/categories" class="nav-link">
-        Categories
-      </router-link>
-    </nav>
-
+    <Navbar />
     <main class="content">
       <router-view />
     </main>
@@ -21,6 +10,7 @@
 <script setup>
 import { RouterView, RouterLink } from 'vue-router';
 import styles from './assets/ui.css';
+import Navbar from "@/layouts/Navbar.vue";
 </script>
 
 <style>

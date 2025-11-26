@@ -14,7 +14,7 @@ export function useAccounts() {
     const loading = ref(false);
     const error = ref(null);
     const message = ref('');
-    const messageOk = ref(null); // true/false/null
+    const messageOk = ref(null);
     
     function showOk(msg) {
         message.value = msg;
@@ -30,7 +30,8 @@ export function useAccounts() {
         loading.value = true;
         error.value = null;
         try {
-            accounts.value = await listAccounts();
+            const data = await listAccounts();
+            accounts.value = data.content;
             currencies.value = [
                 {
                     id: 'RUB',

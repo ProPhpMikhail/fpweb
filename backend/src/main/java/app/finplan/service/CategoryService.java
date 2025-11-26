@@ -6,9 +6,14 @@ import app.finplan.exception.ResourceException;
 import app.finplan.mapper.CategoryMapper;
 import app.finplan.model.Category;
 import app.finplan.model.Transaction;
+import app.finplan.model.User;
 import app.finplan.repositories.CategoryRepository;
 import app.finplan.repositories.TransactionRepository;
+import app.finplan.repositories.UserRepository;
+import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -16,34 +21,37 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 
 @Service
+@RequiredArgsConstructor
 public class CategoryService {
     private final CategoryRepository catRepo;
-    private final TransactionRepository txRepo;
+    private final UserRepository userRepo;
     private final CategoryMapper catMapper;
 
-    public CategoryService(CategoryRepository catRepo, TransactionRepository txRepo, CategoryMapper catMapper) {
-        this.catRepo = catRepo;
-        this.txRepo = txRepo;
-        this.catMapper = catMapper;
+    public Page<CategoryDTO> list(int page, int limit) {
+        Pageable pageable = PageRequest.of(page, limit, Sort.by("sort").ascending());
+        return catRepo.findAll(pageable).map(catMapper::map);
     }
 
-    public List<CategoryDTO> list(int page, int limit) {
-        Sort sort = Sort.by(Sort.Order.asc("sort"));
-        PageRequest pageRequest = PageRequest.of(page, limit, sort);
-        return catRepo.findAll(pageRequest).stream().map(catMapper::map).toList();
+    public Page<CategoryDTO> list(Long userId, int page, int limit) {
+        Pageable pageable = PageRequest.of(page, limit, Sort.by("sort").ascending());
+        return catRepo.findByUserId(userId, pageable).map(catMapper::map);
     }
 
     @Transactional
-    public CategoryDTO create(CategoryCreateDTO dto) {
+    public CategoryDTO create(Long userId, CategoryCreateDTO dto) {
+        User user = userRepo.findById(userId).orElseThrow(
+                () -> new NotFoundException("User not found: " + userId)
+        );
         Category cat = new Category();
         catMapper.create(dto, cat);
+        cat.setUser(user);
         cat = catRepo.save(cat);
         return catMapper.map(cat);
     }
 
     @Transactional
-    public CategoryDTO update(Long id, CategoryUpdateDTO dto) {
-        Category cat = catRepo.findById(id)
+    public CategoryDTO update(Long id, Long userId, CategoryUpdateDTO dto) {
+        Category cat = catRepo.findByIdAndUserId(id, userId)
                 .orElseThrow(() -> new NotFoundException("Category not found: " + id));
         catMapper.update(dto, cat);
         cat = catRepo.save(cat);
@@ -52,8 +60,8 @@ public class CategoryService {
     }
 
     @Transactional
-    public Long delete(Long id) {
-        Category cat = catRepo.findById(id)
+    public Long delete(Long userId, Long id) {
+        Category cat = catRepo.findByIdAndUserId(id, userId)
                 .orElseThrow(() -> new NotFoundException("Category not found: " + id));
         catRepo.delete(cat);
         return id;

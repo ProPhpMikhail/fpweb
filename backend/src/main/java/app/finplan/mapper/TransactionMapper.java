@@ -19,6 +19,7 @@ public abstract class TransactionMapper {
     @Mapping(target = "accountId", source = "model.account.id")
     @Mapping(target = "categoryName", source = "model.category.name")
     @Mapping(target = "categoryId", source = "model.category.id")
+    @Mapping(target = "userId", source = "model.user.id")
     public abstract TransactionDTO map(Transaction model);
     public abstract void update(TransactionUpdateDTO dto, @MappingTarget Transaction model);
     public abstract void create(TransactionCreateDTO dto, @MappingTarget Transaction model);

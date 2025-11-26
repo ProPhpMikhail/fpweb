@@ -1,6 +1,7 @@
 package app.finplan.dto.category;
 
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -13,4 +14,6 @@ public class CategoryDTO {
     @NotBlank
     String name;
     Integer sort;
+    @NotNull
+    Long userId;
 }

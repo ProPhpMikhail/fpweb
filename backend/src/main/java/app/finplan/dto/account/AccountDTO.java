@@ -1,5 +1,6 @@
 package app.finplan.dto.account;
 
+import app.finplan.model.User;
 import jakarta.validation.constraints.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -17,4 +18,6 @@ public class AccountDTO {
     String currency;
     @NotNull
     BigDecimal balance;
+    @NotNull
+    Long userId;
 }

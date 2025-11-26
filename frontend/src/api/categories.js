@@ -1,8 +1,10 @@
 import { http } from './http';
 import { unwrapSuccess } from './helpers';
 
-export async function listCategories(params = {}) {
-    const res = await http.get('/categories', { params });
+export async function listCategories(page = 1, size = 1000) {
+    const res = await http.get('/categories', {
+        params: { page, size },
+    });
     return unwrapSuccess(res);
 }
 
