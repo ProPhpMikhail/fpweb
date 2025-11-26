@@ -32,3 +32,11 @@ services:
       - ./frontend:/app
     depends_on:
       - backend
+
+  frontend-prod:
+    build: ./frontend
+    container_name: fp_prod
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
