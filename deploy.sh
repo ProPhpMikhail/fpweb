@@ -12,7 +12,7 @@ git reset --hard "origin/$BRANCH"
 
 echo ">>> docker up"
 docker compose down
-docker compose --profile prod up -d
+docker compose --profile prod up --build -d
 
 echo ">>> docker clear old images"
 docker image prune -f
