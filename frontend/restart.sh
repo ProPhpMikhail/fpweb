@@ -2,4 +2,4 @@
 set -e
 cd ..
 docker compose down
-docker compose up -d --build frontend
+docker compose up -d --build frontend-dev

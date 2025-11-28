@@ -11,19 +11,46 @@ services:
     volumes:
       - ./postgres:/var/lib/postgresql/data
 
-  backend:
-    build: ./backend
-    container_name: fp_java
+  backend-prod:
+    build:
+      context: ./backend
+      target: prod
+    container_name: fp_back_prod
     ports:
       - "8080:8080"
     depends_on:
       - db
+    profiles: [ "prod" ]
 
-  frontend:
-    build: ./frontend
-    container_name: fp_vue
-    working_dir: /app
-    command: npm run serve -- --host 0.0.0.0
+  frontend-prod:
+    build:
+      context: ./frontend
+      target: prod
+    container_name: fp_front_prod
+    ports:
+      - "80:80"
+    depends_on:
+      - backend-prod
+    profiles: [ "prod" ]
+
+  backend-dev:
+    build:
+      context: ./backend
+      target: dev
+    container_name: fp_back_dev
+    volumes:
+      - ./backend:/app
+    ports:
+      - "8080:8080"
+    depends_on:
+      - db
+    profiles: [ "dev" ]
+
+  frontend-dev:
+    build:
+      context: ./frontend
+      target: dev
+    container_name: fp_front_dev
     environment:
       - NODE_ENV=development
     ports:
@@ -31,12 +58,5 @@ services:
     volumes:
       - ./frontend:/app
     depends_on:
-      - backend
-
-  frontend-prod:
-    build: ./frontend
-    container_name: fp_prod
-    ports:
-      - "80:80"
-    depends_on:
-      - backend
+      - backend-dev
+    profiles: [ "dev" ]

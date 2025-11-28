@@ -11,7 +11,8 @@ git fetch origin "$BRANCH"
 git reset --hard "origin/$BRANCH"
 
 echo ">>> docker up"
-docker compose up -d --build db backend frontend-prod
+docker compose down
+docker compose --profile prod up -d
 
 echo ">>> docker clear old images"
 docker image prune -f
