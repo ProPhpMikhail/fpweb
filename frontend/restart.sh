@@ -1,5 +1,4 @@
 #!/bin/sh
 set -e
 cd ..
-docker compose down
-docker compose up -d --build frontend-dev
+docker compose --profile dev up --build frontend-dev

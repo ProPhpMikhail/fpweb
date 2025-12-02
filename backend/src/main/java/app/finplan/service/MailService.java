@@ -17,7 +17,7 @@ public class MailService {
 
     public void sendConfirmationCode(String to, String code) {
         SimpleMailMessage msg = new SimpleMailMessage();
-        msg.setFrom("no-reply@finplan.local");
+        msg.setFrom("admin@mixa.su");
         msg.setTo(to);
         msg.setSubject("Подтверждение регистрации");
         msg.setText("Ваш код подтверждения: " + code);

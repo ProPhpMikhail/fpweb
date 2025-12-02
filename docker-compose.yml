@@ -37,6 +37,7 @@ services:
     build:
       context: ./backend
       target: dev
+    working_dir: /app
     container_name: fp_back_dev
     volumes:
       - ./backend:/app

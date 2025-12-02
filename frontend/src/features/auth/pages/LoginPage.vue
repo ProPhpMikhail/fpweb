@@ -15,7 +15,7 @@
         <label class="form-label">Пароль</label>
         <input v-model="password" type="password" class="form-control" required />
       </div>
-      <p v-if="error" class="text-danger">{{ error }}</p>
+      <p v-if="error" class="text-danger" v-html="error"></p>
       <button class="btn btn-primary" type="submit" :disabled="loading">
         Войти
       </button>
@@ -55,8 +55,14 @@ async function onSubmit() {
     router.push(redirect);
   } catch (e) {
     console.error(e);
-    error.value = e.response?.data?.message
-        || 'Ошибка входа. Проверьте email/пароль или подтвердите email.';
+    switch (e.code) {
+      case 'email_not_confirmed':
+        error.value = 'Этот email не подтвержден, можете его <a href="/confirm?email=' + email.value + '">подтвердить</a>';
+        break;
+      default:
+        error.value = 'Ошибка входа. Проверьте email/пароль';
+        break;
+    }
   } finally {
     loading.value = false;
   }

@@ -19,10 +19,11 @@ spring:
     ansi:
       enabled: always
   mail:
-    host: smtp.gmail.com
+    host: mail.hosting.reg.ru
     port: 587
-    username: thebestrubl@gmail.com
-    password: jfvepevwqcgvjeio
+    username: admin@mixa.su
+    password: nheGvh322cNHZAV
+    protocol: smtp
     properties:
       mail.smtp.auth: true
       mail.smtp.starttls.enable: true
@@ -41,4 +42,4 @@ security:
     expiration-ms: 86400000
 app:
   mail:
-    from: no-reply@finplan.local
+    from: admin@mixa.su
