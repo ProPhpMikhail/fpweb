@@ -11,7 +11,7 @@ git fetch origin "$BRANCH"
 git reset --hard "origin/$BRANCH"
 
 echo ">>> docker up"
-docker stop $(docker ps -a -q)
+#docker stop $(docker ps -a -q)
 #docker rm $(docker ps -a -q)
 #docker compose down
 docker compose --profile prod up --build -d
