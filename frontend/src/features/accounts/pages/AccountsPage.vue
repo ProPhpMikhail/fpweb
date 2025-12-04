@@ -2,12 +2,12 @@
   <div class="page">
     <header class="page-header">
       <div>
-        <h1 class="page-title">Accounts</h1>
-        <p class="page-subtitle">Счета</p>
+        <h1 class="page-title">Счета</h1>
+        <p class="page-subtitle">Список счетов</p>
       </div>
 
       <div class="page-actions">
-        <button class="btn btn-primary" @click="openCreate">Add account</button>
+        <button class="btn btn-primary" @click="openCreate">Добавить</button>
       </div>
     </header>
 
@@ -49,6 +49,13 @@
           @cancel="closeCreate"
       />
     </BaseModal>
+
+    <Pagination
+        :page="page"
+        :totalPages="totalPages"
+        :totalElements="totalElements"
+        @onChange="setPage"
+    />
   </div>
 </template>
 
@@ -58,6 +65,8 @@ import AccountForm from "@/features/accounts/components/AccountForm.vue";
 import {useAccounts} from "@/features/accounts/composables/useAccounts";
 import AccountTable from "@/features/accounts/components/AccountTable.vue";
 import BaseModal from "@/components/ui/components/BaseModal.vue";
+import Pagination from "@/components/ui/components/Pagination.vue";
+import router from "@/router";
 
 const {
   accounts,
@@ -65,6 +74,10 @@ const {
   loading,
   message,
   messageOk,
+  page,
+  size,
+  totalPages,
+  totalElements,
   load,
   addAccount,
   updateAccountById,
@@ -77,7 +90,7 @@ const isEditOpen = ref(false);
 const initial = reactive({});
 
 onMounted(async () => {
-  await Promise.all([load()]);
+  await Promise.all([load(page.value, size.value)]);
 });
 
 function openCreate() {
@@ -101,7 +114,6 @@ function closeEdit() {
 }
 
 function onAdd(payload) {
-  console.log(payload);
   addAccount({
     name: payload.name,
     sort: payload.sort,
@@ -109,6 +121,7 @@ function onAdd(payload) {
     currency: payload.currency,
   });
   closeCreate();
+  setPage(1);
 }
 
 function onUpdate(payload) {
@@ -122,6 +135,19 @@ function onUpdate(payload) {
 
 function onDelete(payload) {
   deleteAccountById(payload.id);
+  setPage(1);
+}
+
+async function setPage(newPage) {
+  if (newPage < 1) return;
+  if (totalPages.value && newPage > totalPages.value) return;
+  await load(newPage, size.value);
+  router.replace({
+    query: {
+      page: page.value,
+      size: size.value,
+    }
+  });
 }
 
 const messageClass = computed(() => ({

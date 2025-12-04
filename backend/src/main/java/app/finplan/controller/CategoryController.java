@@ -43,7 +43,7 @@ public class CategoryController {
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     ResponseEntity<ApiResponse<CategoryDTO>> create(
-            @RequestBody CategoryCreateDTO dto,
+            @Valid @RequestBody CategoryCreateDTO dto,
             Principal principal
     ) {
         String userEmail = principal.getName();

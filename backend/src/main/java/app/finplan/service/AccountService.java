@@ -3,10 +3,12 @@ package app.finplan.service;
 import app.finplan.dto.account.AccountCreateDTO;
 import app.finplan.dto.account.AccountDTO;
 import app.finplan.dto.account.AccountUpdateDTO;
+import app.finplan.dto.currency.CurrencyDTO;
 import app.finplan.exception.NotFoundException;
 import app.finplan.exception.ResourceException;
 import app.finplan.mapper.AccountMapper;
 import app.finplan.model.Account;
+import app.finplan.model.Currency;
 import app.finplan.model.Transaction;
 import app.finplan.model.User;
 import app.finplan.repositories.AccountRepository;
@@ -20,6 +22,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Arrays;
 import java.util.List;
 
 @Service
@@ -39,6 +42,10 @@ public class AccountService {
     public Page<AccountDTO> list(Long userId, int page, int limit) {
         Pageable pageable = PageRequest.of(page, limit, Sort.by("sort").ascending());
         return accRepo.findByUserId(userId, pageable).map(accMapper::map);
+    }
+
+    public List<CurrencyDTO> listCurrencies() {
+        return Arrays.stream(Currency.values()).map(cur -> new CurrencyDTO(cur.name(), cur.name())).toList();
     }
 
     @Transactional

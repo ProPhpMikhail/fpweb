@@ -4,14 +4,14 @@
       <thead>
       <tr>
         <th>#</th>
-        <th>Name</th>
-        <th>Account</th>
-        <th>Amount</th>
-        <th>Category</th>
-        <th>Created at</th>
-        <th>Geo</th>
-        <th>Edit</th>
-        <th>Delete</th>
+        <th>Имя</th>
+        <th>Счет</th>
+        <th>Сумма</th>
+        <th>Категория</th>
+        <th>Дата</th>
+        <th>Гео</th>
+        <th>Изменить</th>
+        <th>Удалить</th>
       </tr>
       </thead>
       <tbody>
@@ -36,17 +36,17 @@
           </button>
         </td>
         <td>
-          <button class="btn btn-primary" @click="emit('update', t)">Edit</button>
+          <button class="btn btn-primary" @click="emit('update', t)">Изменить</button>
         </td>
         <td>
-          <button class="btn btn-danger" @click="emit('delete', t)">Delete</button>
+          <button class="btn btn-danger" @click="emit('delete', t)">Удалить</button>
         </td>
       </tr>
       </tbody>
     </table>
   </div>
   <div v-else class="muted">
-    <p>No transactions yet</p>
+    <p>Нет транзакций</p>
   </div>
 </template>
 

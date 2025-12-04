@@ -1,8 +1,7 @@
 package app.finplan.service;
 
 import app.finplan.dto.transaction.*;
-import app.finplan.exception.NotFoundException;
-import app.finplan.exception.ResourceException;
+import app.finplan.exception.*;
 import app.finplan.mapper.TransactionMapper;
 import app.finplan.model.Account;
 import app.finplan.model.Category;
@@ -19,6 +18,10 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.math.BigDecimal;
+import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -48,22 +51,26 @@ public class TransactionService {
     @Transactional
     public TransactionDTO create(Long userId, TransactionCreateDTO dto) {
         User user = userRepo.findById(userId).orElseThrow(
-                () -> new NotFoundException("User not found: " + userId)
+                () -> new BusinessException(UserException.NOT_FOUND)
         );
         Account acc = accRepo.findByIdAndUserId(dto.getAccountId(), userId)
-                .orElseThrow(() -> new NotFoundException("Account not found: " + dto.getAccountId()));
+                .orElseThrow(() -> new BusinessException(AccountException.NOT_FOUND));
+
+        BigDecimal newBalance = acc.getBalance().add(dto.getAmount());
+        if (newBalance.compareTo(BigDecimal.ZERO) < 0) {
+            throw new BusinessException(AccountException.LESS_ZERO);
+        }
+
         Transaction tx = new Transaction();
         txMapper.create(dto, tx);
         tx.setAccount(acc);
         tx.setUser(user);
         if (dto.getCategoryId() != null) {
-            Category cat = catRepo.findByIdAndUserId(dto.getCategoryId(), userId)
-                    .orElseThrow(() -> new NotFoundException("Category not found: " + dto.getCategoryId()));
-            tx.setCategory(cat);
+            Optional<Category> cat = catRepo.findByIdAndUserId(dto.getCategoryId(), userId);
+            cat.ifPresent(tx::setCategory);
         }
         tx = txRepo.save(tx);
-
-        acc.setBalance(acc.getBalance().add(dto.getAmount()));
+        acc.setBalance(newBalance);
         accRepo.save(acc);
 
         return txMapper.map(tx);
@@ -72,15 +79,18 @@ public class TransactionService {
     @Transactional
     public TransactionDTO update(Long id, Long userId, TransactionUpdateDTO dto) {
         Transaction tx = txRepo.findByIdAndUserId(id, userId)
-                .orElseThrow(() -> new NotFoundException("Transaction not found: " + id));
+                .orElseThrow(() -> new BusinessException(TransactionException.NOT_FOUND));
         if (dto.getCategoryId() != null) {
-            Category cat = catRepo.findById(dto.getCategoryId())
-                    .orElseThrow(() -> new NotFoundException("Category not found: " + dto.getCategoryId()));
-
-            tx.setCategory(cat);
+            Optional<Category> cat = catRepo.findByIdAndUserId(dto.getCategoryId(), userId);
+            cat.ifPresent(tx::setCategory);
         }
 
         Account acc = tx.getAccount();
+        BigDecimal balanceBefore = getBalanceBeforeTransaction(acc, tx);
+        System.out.println(balanceBefore);
+        if (balanceBefore.add(dto.getAmount()).compareTo(BigDecimal.ZERO) < 0) {
+            throw new BusinessException(AccountException.LESS_ZERO);
+        }
         acc.setBalance(acc.getBalance().subtract(tx.getAmount()).add(dto.getAmount()));
 
         txMapper.update(dto, tx);
@@ -91,10 +101,19 @@ public class TransactionService {
         return txMapper.map(tx);
     }
 
+    private BigDecimal getBalanceBeforeTransaction(Account account, Transaction transaction) {
+        BigDecimal balanceBefore = account.getBalance();
+        List<Transaction> afterTxList = txRepo.findAfter(account.getId(), transaction.getCreatedAt(), transaction.getId());
+        for (Transaction trx : afterTxList) {
+            balanceBefore = balanceBefore.subtract(trx.getAmount());
+        }
+        return balanceBefore.subtract(transaction.getAmount());
+    }
+
     @Transactional
     public Long delete(Long userId, Long id) {
-        Transaction tx = txRepo.findByIdAndUserId(userId, id)
-                .orElseThrow(() -> new NotFoundException("Transaction not found: " + id));
+        Transaction tx = txRepo.findByIdAndUserId(id, userId)
+                .orElseThrow(() -> new BusinessException(TransactionException.NOT_FOUND));
         Account acc = tx.getAccount();
 
         acc.setBalance(acc.getBalance().subtract(tx.getAmount()));

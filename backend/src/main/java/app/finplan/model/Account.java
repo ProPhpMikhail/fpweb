@@ -20,7 +20,10 @@ public class Account {
 
     private String name;
     private Integer sort = 1;
-    private String currency;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private Currency currency;
 
     @Column(nullable = false)
     private BigDecimal balance = BigDecimal.ZERO;

@@ -88,8 +88,7 @@ async function onSubmitReg() {
       default:
         if (e.details) {
           e.details.forEach(function (err)  {
-            console.log(err.field);
-            if (err.field == 'password') {
+            if (err.code === 'invalid_password') {
               error.value = 'Пароль должен содержать мин одну цифру, одну букву и иметь длину более 8 символов';
             }
           });

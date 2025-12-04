@@ -4,17 +4,24 @@ import {
     createAccount,
     updateAccount,
     deleteAccount,
-    clearAccount,
+    clearAccount, listCurrencies,
 } from '@/api/accounts';
+import {useRoute} from "vue-router";
 
 
 export function useAccounts() {
+    const route = useRoute();
     const accounts = ref([]);
     const currencies = ref([]);
     const loading = ref(false);
     const error = ref(null);
     const message = ref('');
     const messageOk = ref(null);
+    
+    const page = ref( Number(route.query.page ?? 1) );
+    const size = ref( Number(route.query.size ?? 3) );
+    const totalPages = ref( Number(0) );
+    const totalElements = ref( Number(0) );
     
     function showOk(msg) {
         message.value = msg;
@@ -26,22 +33,17 @@ export function useAccounts() {
         messageOk.value = false;
     }
     
-    async function load() {
+    async function load(pageArg = 1, sizeArg = 20) {
         loading.value = true;
         error.value = null;
         try {
-            const data = await listAccounts();
+            const data = await listAccounts(pageArg, sizeArg);
             accounts.value = data.content;
-            currencies.value = [
-                {
-                    id: 'RUB',
-                    name: 'RUB',
-                },
-                {
-                    id: 'USD',
-                    name: 'USD',
-                }
-            ];
+            page.value = data.number + 1;
+            size.value = data.size;
+            totalPages.value = data.totalPages;
+            totalElements.value = data.totalElements;
+            currencies.value = await listCurrencies();
             showOk('Данные загружены');
         } catch (e) {
             console.error(e);
@@ -103,6 +105,10 @@ export function useAccounts() {
         error,
         message,
         messageOk,
+        page,
+        size,
+        totalPages,
+        totalElements,
         load,
         addAccount,
         updateAccountById,

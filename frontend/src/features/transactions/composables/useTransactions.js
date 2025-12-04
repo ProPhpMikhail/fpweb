@@ -41,11 +41,11 @@ export function useTransactions() {
         messageOk.value = false;
     }
     
-    async function load(pageArg = 1, sizeArg = 10) {
+    async function load(pageArg = 1, sizeArg = 20) {
         loading.value = true;
         error.value = null;
         try {
-            const accountData = await listAccounts();
+            const accountData = await listAccounts(1, 1000);
             accounts.value = accountData.content;
             const categoriesData = await listCategories();
             categories.value = categoriesData.content;

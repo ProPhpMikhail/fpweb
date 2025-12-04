@@ -4,7 +4,8 @@ import app.finplan.dto.user.AuthResponse;
 import app.finplan.dto.user.ConfirmEmailRequest;
 import app.finplan.dto.user.LoginRequest;
 import app.finplan.dto.user.RegisterRequest;
-import app.finplan.exception.AuthException;
+import app.finplan.exception.UserException;
+import app.finplan.exception.BusinessException;
 import app.finplan.model.User;
 import app.finplan.model.UserRole;
 import app.finplan.repositories.UserRepository;
@@ -31,9 +32,9 @@ public class AuthService {
         if (userOptional.isPresent()) {
             User user = userOptional.get();
             if (user.getRole() == UserRole.UNCONFIRMED) {
-                throw new AuthException("Email not confirmed", AuthException.EMAIL_NOT_CONFIRMED);
+                throw new BusinessException(UserException.EMAIL_NOT_CONFIRMED);
             } else {
-                throw new AuthException("Email already in use", AuthException.EMAIL_EXISTS);
+                throw new BusinessException(UserException.EMAIL_EXISTS);
             }
         }
 
@@ -50,10 +51,10 @@ public class AuthService {
 
     public void confirmEmail(ConfirmEmailRequest request) {
         User user = userRepository.findByEmail(request.email())
-                .orElseThrow(() -> new AuthException("User not found", AuthException.USER_NOT_FOUND));
+                .orElseThrow(() -> new BusinessException(UserException.NOT_FOUND));
 
         if (user.getCode() == null || !user.getCode().equals(request.code())) {
-            throw new AuthException("Invalid confirmation code", AuthException.INVALID_CONFIRMATION_CODE);
+            throw new BusinessException(UserException.INVALID_CONFIRMATION_CODE);
         }
 
         user.setCode(null);
@@ -64,14 +65,14 @@ public class AuthService {
     public AuthResponse login(LoginRequest request) {
         User user = userRepository.findByEmail(request.email()).orElseThrow();
         if (user.getRole() == UserRole.UNCONFIRMED) {
-            throw new AuthException("Email not confirmed", AuthException.EMAIL_NOT_CONFIRMED);
+            throw new BusinessException(UserException.EMAIL_NOT_CONFIRMED);
         }
 
         UserDetails userDetails =
                 userDetailsService.loadUserByUsername(request.email());
 
         if (!passwordEncoder.matches(request.password(), userDetails.getPassword())) {
-            throw new AuthException("Invalid credentials", AuthException.INVALID_CREDENTIALS);
+            throw new BusinessException(UserException.INVALID_CREDENTIALS);
         }
 
         String token = jwtService.generateToken(userDetails);
@@ -81,10 +82,10 @@ public class AuthService {
 
     public void resendCode(String email) {
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new AuthException("User not found", AuthException.USER_NOT_FOUND));
+                .orElseThrow(() -> new BusinessException(UserException.NOT_FOUND));
 
         if (user.getRole() != UserRole.UNCONFIRMED) {
-            throw new AuthException("Email already confirmed", AuthException.EMAIL_ALREADY_CONFIRMED);
+            throw new BusinessException(UserException.EMAIL_ALREADY_CONFIRMED);
         }
 
         String code = generateCode();

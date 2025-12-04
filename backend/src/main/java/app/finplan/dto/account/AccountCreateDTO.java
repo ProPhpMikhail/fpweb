@@ -10,8 +10,9 @@ import java.math.BigDecimal;
 @Getter
 @Setter
 public class AccountCreateDTO {
+    @NotBlank
     String name;
-    Integer sort;
+    Integer sort = 1;
     @NotBlank
     String currency;
     @NotNull

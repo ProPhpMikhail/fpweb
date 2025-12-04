@@ -1,10 +1,15 @@
 import { http } from './http';
 import { unwrapSuccess } from './helpers';
 
-export async function listAccounts(page = 1, size = 1000) {
+export async function listAccounts(page, size) {
     const res = await http.get('/accounts', {
         params: { page, size },
     });
+    return unwrapSuccess(res);
+}
+
+export async function listCurrencies() {
+    const res = await http.get('/accounts/currencies');
     return unwrapSuccess(res);
 }
 

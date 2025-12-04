@@ -25,6 +25,7 @@ spring:
     password: nheGvh322cNHZAV
     protocol: smtp
     properties:
+      mail.debug: true
       mail.smtp.auth: true
       mail.smtp.starttls.enable: true
 

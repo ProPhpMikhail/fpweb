@@ -3,6 +3,7 @@ package app.finplan.controller;
 import app.finplan.dto.user.*;
 import app.finplan.handler.ApiResponse;
 import app.finplan.service.AuthService;
+import app.finplan.service.MailService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,6 +18,9 @@ public class AuthController {
 
     @Autowired
     private final AuthService authService;
+
+    @Autowired
+    MailService mailService;
 
     @PostMapping("/register")
     @ResponseStatus(HttpStatus.CREATED)
@@ -38,4 +42,11 @@ public class AuthController {
     public ResponseEntity<ApiResponse<AuthResponse>> login(@RequestBody LoginRequest request) {
         return ResponseEntity.ok(ApiResponse.ok(authService.login(request)));
     }
+
+    @PostMapping("/mail")
+    public ResponseEntity<ApiResponse<String>> mail() {
+        mailService.sendConfirmationCode("thebestrubl@gmail.com", "1234");
+        return ResponseEntity.ok(ApiResponse.ok("success"));
+    }
 }
+

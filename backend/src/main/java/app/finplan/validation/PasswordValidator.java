@@ -24,7 +24,6 @@ public class PasswordValidator implements ConstraintValidator<ValidPassword, Str
         if (!valid) {
             context.disableDefaultConstraintViolation();
             context.buildConstraintViolationWithTemplate(annotation.message())
-                    .addPropertyNode("password")
                     .addConstraintViolation();
         }
         return valid;

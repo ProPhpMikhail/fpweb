@@ -2,7 +2,7 @@
   <form @submit.prevent="onSubmit">
     <div class="form-row align-items-center">
       <div class="col-auto">
-        <label class="sr-only" for="name">Name</label>
+        <label class="sr-only" for="name">Имя</label>
         <input
             class="form-control mb-2"
             id="name"
@@ -12,7 +12,7 @@
         >
       </div>
       <div class="col-auto">
-        <label class="sr-only" for="name">Sort</label>
+        <label class="sr-only" for="name">Сортировка</label>
         <input
             class="form-control mb-2"
             id="sort"
@@ -23,7 +23,7 @@
       </div>
       <div class="col-auto">
         <button class="btn btn-primary mb-2" type="submit">
-          Save
+          Сохранить
         </button>
       </div>
     </div>

@@ -6,14 +6,21 @@ import {
     deleteCategory,
     clearCategories,
 } from '@/api/categories';
+import {useRoute} from "vue-router";
 
 
 export function useCategories() {
+    const route = useRoute();
     const categories = ref([]);
     const loading = ref(false);
     const error = ref(null);
     const message = ref('');
-    const messageOk = ref(null); // true/false/null
+    const messageOk = ref(null);
+    
+    const page = ref( Number(route.query.page ?? 1) );
+    const size = ref( Number(route.query.size ?? 3) );
+    const totalPages = ref( Number(0) );
+    const totalElements = ref( Number(0) );
     
     function showOk(msg) {
         message.value = msg;
@@ -25,11 +32,15 @@ export function useCategories() {
         messageOk.value = false;
     }
     
-    async function load() {
+    async function load(pageArg = 1, sizeArg = 20) {
         loading.value = true;
         error.value = null;
         try {
-            const data = await listCategories();
+            const data = await listCategories(pageArg, sizeArg);
+            page.value = data.number + 1;
+            size.value = data.size;
+            totalPages.value = data.totalPages;
+            totalElements.value = data.totalElements;
             categories.value = data.content;
             showOk('Данные загружены');
         } catch (e) {
@@ -91,6 +102,10 @@ export function useCategories() {
         error,
         message,
         messageOk,
+        page,
+        size,
+        totalPages,
+        totalElements,
         load,
         addCategory,
         updateCategoryById,

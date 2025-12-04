@@ -2,7 +2,7 @@
   <form @submit.prevent="onSubmit">
     <div class="form-row align-items-center">
       <div class="col-auto">
-        <label class="sr-only" for="name">Name</label>
+        <label class="sr-only" for="name">Имя</label>
         <input
             class="form-control mb-2"
             id="name"
@@ -13,7 +13,7 @@
         >
       </div>
       <div class="col-auto" v-if="accounts">
-        <label class="sr-only" for="account">Account</label>
+        <label class="sr-only" for="account">Счет</label>
         <select
             id="account"
             class="form-control mb-2 form-select"
@@ -30,7 +30,7 @@
         </select>
       </div>
       <div class="col-auto" v-if="categories">
-        <label class="sr-only" for="account">Category</label>
+        <label class="sr-only" for="account">Категория</label>
         <select
             id="category"
             class="form-control mb-2 form-select"
@@ -56,7 +56,7 @@
         </label>
       </div>
       <div class="col-auto">
-        <label class="sr-only" for="amount">Amount</label>
+        <label class="sr-only" for="amount">Сумма</label>
         <input
             class="form-control"
             v-model.number="local.amount"
@@ -66,7 +66,7 @@
         >
       </div>
       <div class="col-auto">
-        <label class="sr-only" for="createdAt">Created at</label>
+        <label class="sr-only" for="createdAt">Дата</label>
         <input
             id="createdAt"
             class="form-control mb-2"
@@ -99,7 +99,7 @@
       </div>
       <div class="col-auto">
         <button class="btn btn-primary mb-2" type="submit">
-          Save
+          Сохранить
         </button>
       </div>
     </div>
@@ -124,11 +124,12 @@ const local = reactive({
           ? 'income'
           : 'expense',
   accountId: props.initial?.accountId ?? props?.accounts[0]?.id ?? '',
-  categoryId: props.initial?.categoryId ?? props?.categories[0]?.id ?? '',
-  createdAt: toLocalInputValue(props.initial?.createdAt) ?? nowLocal(),
+  categoryId: props.initial?.categoryId ?? '',
+  createdAt: (props.initial?.createdAt ? toLocalInputValue(props.initial?.createdAt) : nowLocal()),
   latitude: props.initial?.latitude ?? null,
   longitude: props.initial?.longitude ?? null,
 });
+console.log(local);
 const emit = defineEmits(['submit', 'openMap']);
 function onSubmit() {
   let amount = Number(local.amount) || 0;

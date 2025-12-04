@@ -3,6 +3,7 @@ package app.finplan.controller;
 import app.finplan.dto.account.AccountCreateDTO;
 import app.finplan.dto.account.AccountDTO;
 import app.finplan.dto.account.AccountUpdateDTO;
+import app.finplan.dto.currency.CurrencyDTO;
 import app.finplan.exception.NotFoundException;
 import app.finplan.exception.ResourceException;
 import app.finplan.handler.ApiResponse;
@@ -43,10 +44,16 @@ public class AccountController {
         return ResponseEntity.ok(ApiResponse.ok(list));
     }
 
+    @GetMapping("/currencies")
+    @ResponseStatus(HttpStatus.OK)
+    ResponseEntity<ApiResponse<List<CurrencyDTO>>> listCurrencies() {
+        return ResponseEntity.ok(ApiResponse.ok(accService.listCurrencies()));
+    }
+
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     ResponseEntity<ApiResponse<AccountDTO>> create(
-            @RequestBody AccountCreateDTO dto,
+            @Valid @RequestBody AccountCreateDTO dto,
             Principal principal
     ) {
         String userEmail = principal.getName();

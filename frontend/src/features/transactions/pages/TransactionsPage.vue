@@ -2,12 +2,12 @@
   <div class="page">
     <header class="page-header">
       <div>
-        <h1 class="page-title">Transactions</h1>
+        <h1 class="page-title">Транзакции</h1>
         <p class="page-subtitle">Учет движений по счетам</p>
       </div>
 
       <div class="page-actions" v-if="accounts.length">
-        <button class="btn btn-primary" @click="openCreate">Add transaction</button>
+        <button class="btn btn-primary" @click="openCreate">Добавить</button>
       </div>
     </header>
     <div v-if="accounts.length">
@@ -70,7 +70,7 @@
 
     </div>
     <div v-else>
-      <p>Add <a href="/accounts">Account</a></p>
+      <p>Добавить <a href="/accounts">счет</a></p>
     </div>
   </div>
 </template>
@@ -229,7 +229,7 @@ async function getUserLocation() {
 
 async function setPage(newPage) {
   if (newPage < 1) return;
-  if (totalPages.value && newPage >= totalPages.value) return;
+  if (totalPages.value && newPage > totalPages.value) return;
   await load(newPage, size.value);
   router.replace({
     query: {

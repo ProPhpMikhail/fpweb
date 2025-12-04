@@ -4,10 +4,10 @@
       <thead>
       <tr>
         <th>#</th>
-        <th>Name</th>
-        <th>Sort</th>
-        <th>Update</th>
-        <th>Delete</th>
+        <th>Имя</th>
+        <th>Сортировка</th>
+        <th>Изменить</th>
+        <th>Удалить</th>
       </tr>
       </thead>
       <tbody>
@@ -21,12 +21,12 @@
         </td>
         <td>
           <button class="btn btn-primary mb-2" @click="emit('update', cat)">
-            Update
+            Изменить
           </button>
         </td>
         <td>
           <button class="btn btn-danger mb-2" @click="emit('delete', cat)">
-            Delete
+            Удалить
           </button>
         </td>
       </tr>
@@ -34,7 +34,7 @@
     </table>
   </div>
   <div v-else>
-    <p>No categories yet</p>
+    <p>Нет категорий</p>
   </div>
 </template>
 

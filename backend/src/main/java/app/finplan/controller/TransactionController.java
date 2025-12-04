@@ -53,7 +53,7 @@ public class TransactionController {
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     ResponseEntity<ApiResponse<TransactionDTO>> create(
-            @RequestBody TransactionCreateDTO dto,
+            @Valid @RequestBody TransactionCreateDTO dto,
             Principal principal
     ) {
         String userEmail = principal.getName();
