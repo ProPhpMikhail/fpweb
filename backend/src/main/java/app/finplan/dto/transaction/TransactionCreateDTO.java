@@ -13,7 +13,7 @@ import java.time.LocalDateTime;
 public class TransactionCreateDTO {
     @NotBlank
     String name;
-    @NotBlank
+    @NotNull
     BigDecimal amount;
     @NotNull
     Long accountId;

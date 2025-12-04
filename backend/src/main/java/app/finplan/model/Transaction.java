@@ -47,4 +47,13 @@ public class Transaction {
             createdAt = LocalDateTime.now();
         }
     }
+
+    @Override
+    public String toString() {
+        return "Transaction{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", amount=" + amount +
+                '}';
+    }
 }
