@@ -1,4 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router';
+import { checkAuth } from "@/api/http";
 
 const routes = [
     {
@@ -51,9 +52,12 @@ const router = createRouter({
     routes,
 });
 
-router.beforeEach((to, from, next) => {
+router.beforeEach(async (to, from, next) => {
     const authorized = to.meta.authorized === true;
-    
+    if (authorized) {
+        console.log(to.fullPath);
+        await checkAuth();
+    }
     const token = localStorage.getItem('token');
     
     if (authorized && !token) {

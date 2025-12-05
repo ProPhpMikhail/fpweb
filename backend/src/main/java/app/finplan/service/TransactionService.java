@@ -11,13 +11,21 @@ import app.finplan.repositories.AccountRepository;
 import app.finplan.repositories.CategoryRepository;
 import app.finplan.repositories.TransactionRepository;
 import app.finplan.repositories.UserRepository;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Predicate;
+import jakarta.persistence.criteria.Root;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import static app.finplan.repositories.TransactionSpecifications.*;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -31,6 +39,9 @@ public class TransactionService {
     private final AccountRepository accRepo;
     private final CategoryRepository catRepo;
     private final TransactionMapper txMapper;
+
+    @PersistenceContext
+    private EntityManager em;
 
     public Page<TransactionDTO> list(int page, int limit) {
         Pageable pageable = PageRequest.of(page, limit, Sort.by("createdAt").descending());
@@ -46,6 +57,52 @@ public class TransactionService {
         Page<Transaction> txPage = txRepo.findByUserId(userId, pageable);
 
         return txPage.map(txMapper::map);
+    }
+
+    public Page<TransactionDTO> list(Long userId, TransactionFilter filter, int page, int limit) {
+        Pageable pageable = PageRequest.of(page, limit, Sort.by("createdAt").descending());
+        Specification<Transaction> spec = Specification.where(userIdEquals(userId))
+                .and(accountIdEquals(filter.accountId()))
+                .and(categoryIdEquals(filter.categoryId()))
+                .and(nameContains(filter.name()))
+                .and(type(filter.type()))
+                .and(amountBetween(filter.amountFrom(), filter.amountTo()))
+                .and(dateBetween(filter.createdAtFrom(), filter.createdAtTo()));
+
+        Page<Transaction> txPage = txRepo.findAll(spec, pageable);
+
+        return txPage.map(txMapper::map);
+    }
+
+    public TransactionSummary getSummary(Long userId, TransactionFilter filter) {
+        if (filter.type() == null || filter.type().isBlank() || filter.accountId() == null) {
+            return null;
+        }
+        Specification<Transaction> spec = Specification.where(userIdEquals(userId))
+                .and(accountIdEquals(filter.accountId()))
+                .and(categoryIdEquals(filter.categoryId()))
+                .and(nameContains(filter.name()))
+                .and(type(filter.type()))
+                .and(amountBetween(filter.amountFrom(), filter.amountTo()))
+                .and(dateBetween(filter.createdAtFrom(), filter.createdAtTo()));
+
+        CriteriaBuilder cb = em.getCriteriaBuilder();
+        CriteriaQuery<BigDecimal> cq = cb.createQuery(BigDecimal.class);
+        Root<Transaction> root = cq.from(Transaction.class);
+
+        Predicate predicate = spec.toPredicate(root, cq, cb);
+
+        cq.select(cb.sum(root.get("amount")));
+        if (predicate != null) {
+            cq.where(predicate);
+        }
+
+        BigDecimal sum = em.createQuery(cq).getSingleResult();
+        if (sum == null) {
+            return null;
+        }
+
+        return new TransactionSummary(filter.type(), sum.abs());
     }
 
     @Transactional

@@ -1,9 +1,9 @@
 import { http } from './http';
 import { unwrapSuccess } from './helpers';
 
-export async function listTransactions(page = 1, size = 20) {
+export async function listTransactions(page = 1, size = 20, filter = {}) {
     const res = await http.get('/transactions', {
-        params: { page, size },
+        params: { page, size, ...filter },
     });
     return unwrapSuccess(res);
 }

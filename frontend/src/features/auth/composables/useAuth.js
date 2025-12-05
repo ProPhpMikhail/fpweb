@@ -19,6 +19,7 @@ export function useAuth() {
         
         localStorage.setItem('token', data.token);
         localStorage.setItem('user', JSON.stringify(currentUser.value));
+        console.log(localStorage.getItem('token'))
     }
     
     async function register(email, password) {

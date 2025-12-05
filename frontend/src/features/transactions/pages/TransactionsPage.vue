@@ -5,12 +5,24 @@
         <h1 class="page-title">Транзакции</h1>
         <p class="page-subtitle">Учет движений по счетам</p>
       </div>
+    </header>
+    <div v-if="accounts.length">
+
+      <TransactionFilterForm
+        @applyFilter="applyFilter"
+        :initial="filter"
+        :accounts="accounts"
+        :categories="categories"
+      />
+
+      <div class="summary" v-if="summaryType">
+        <p v-if="summaryType === 'expense'">Суммарный <span style="color: red">расход</span> по счету: <span>{{ summaryAmount }}</span></p>
+        <p v-if="summaryType === 'income'">Суммарный <span style="color: green">приход</span> по счету: <span>{{ summaryAmount }}</span></p>
+      </div>
 
       <div class="page-actions" v-if="accounts.length">
         <button class="btn btn-primary" @click="openCreate">Добавить</button>
       </div>
-    </header>
-    <div v-if="accounts.length">
 
       <p v-if="loading">Loading...</p>
 
@@ -84,6 +96,7 @@ import TransactionForm from '@/features/transactions/components/TransactionForm.
 import BaseModal from '@/components/ui/components/BaseModal.vue';
 import MapModal from '@/components/ui/components/MapModal.vue';
 import Pagination from "@/components/ui/components/Pagination.vue";
+import TransactionFilterForm from "@/features/transactions/components/TransactionFilterForm.vue";
 
 const {
   transactions,
@@ -96,6 +109,8 @@ const {
   size,
   totalPages,
   totalElements,
+  summaryAmount,
+  summaryType,
   load,
   addTransaction,
   updateTransactionById,
@@ -113,7 +128,18 @@ const defaultLatitude = 55.751244;
 const defaultLongitude = 37.618423;
 
 onMounted(async () => {
-  await Promise.all([load(page.value, size.value)]);
+  await Promise.all([load(page.value, size.value, filter)]);
+});
+
+const filter = reactive({
+  accountId: route.query.accountId ?? '',
+  categoryId: route.query.categoryId ?? '',
+  name: route.query.name ?? '',
+  type: route.query.type ?? '',
+  amountFrom: route.query.amountFrom ?? '',
+  amountTo: route.query.amountTo ?? '',
+  createdAtFrom: route.query.createdAtFrom ?? '',
+  createdAtTo: route.query.createdAtTo ?? '',
 });
 
 watch(
@@ -121,9 +147,44 @@ watch(
     (q) => {
       page.value = Number(q.page ?? 1);
       size.value = Number(q.size ?? 10);
-      load(page.value, size.value);
+
+      filter.accountId  = q.accountId  ?? '';
+      filter.categoryId = q.categoryId ?? '';
+      filter.name = q.name ?? '';
+      filter.type = q.type ?? '';
+      filter.amountFrom = q.amountFrom ?? '';
+      filter.amountTo = q.amountTo ?? '';
+      filter.createdAtFrom = q.createdAtFrom ?? '';
+      filter.createdAtTo = q.createdAtTo ?? '';
+
+      load(page.value, size.value, filter);
     }
 );
+
+function getQuery() {
+  const query = {
+    page: page.value,
+    size: size.value,
+  };
+
+  Object.entries(filter).forEach(([key, value]) => {
+    if (value !== '' && value != null) {
+      query[key] = value;
+    }
+  });
+
+  return query;
+}
+
+async function applyFilter(payload) {
+  page.value = 1;
+  Object.entries(payload).forEach(([key, value]) => {
+    filter[key] = value
+  });
+  router.replace({
+    query: getQuery(),
+  });
+}
 
 function selectLocation({ latitude, longitude }) {
   initial.latitude = latitude.toFixed(6);
@@ -166,8 +227,8 @@ function closeEdit() {
   }
 }
 
-function onAdd(payload) {
-  addTransaction({
+async function onAdd(payload) {
+  await addTransaction({
     name: payload.name,
     amount: Number(payload.amount || 0),
     accountId: Number(payload.accountId),
@@ -180,13 +241,13 @@ function onAdd(payload) {
   setPage(1);
 }
 
-function onDelete(payload) {
-  deleteTransactionById(payload.id);
+async function onDelete(payload) {
+  await deleteTransactionById(payload.id);
   setPage(1);
 }
 
-function onUpdate(payload) {
-  updateTransactionById(payload.id, {
+async function onUpdate(payload) {
+  await updateTransactionById(payload.id, {
     name: payload.name,
     amount: Number(payload.amount || 0),
     categoryId: Number(payload.categoryId),
@@ -195,6 +256,7 @@ function onUpdate(payload) {
     longitude: payload.longitude,
   });
   closeEdit();
+  setPage(page.value);
 }
 
 async function getUserLocation() {
@@ -230,12 +292,9 @@ async function getUserLocation() {
 async function setPage(newPage) {
   if (newPage < 1) return;
   if (totalPages.value && newPage > totalPages.value) return;
-  await load(newPage, size.value);
+  await load(newPage, size.value, filter);
   router.replace({
-    query: {
-      page: page.value,
-      size: size.value,
-    }
+    query: getQuery()
   });
 }
 

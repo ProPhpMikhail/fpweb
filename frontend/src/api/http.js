@@ -1,4 +1,5 @@
 import axios from 'axios';
+import router from "@/router";
 
 const http = axios.create({
     baseURL: '/api',
@@ -6,8 +7,23 @@ const http = axios.create({
     withCredentials: false,
 });
 
+export async function checkAuth() {
+    try {
+        await http.get('/auth/valid');
+        return true;
+    } catch (error) {
+        console.log(error);
+        if (error?.status && error?.status === 401 || error?.status === 403) {
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+        }
+        return false;
+    }
+}
+
 http.interceptors.request.use((config) => {
     const token = localStorage.getItem('token');
+    console.log(token);
     if (token) {
         config.headers.Authorization = `Bearer ${token}`;
     }
@@ -15,6 +31,16 @@ http.interceptors.request.use((config) => {
 });
 
 export { http };
+
+class ApiError extends Error {
+    constructor({ status, title, message, code, details }) {
+        super(message);
+        this.status = status;
+        this.title = title;
+        this.code = code;
+        this.details = details;
+    }
+}
 
 function normalizeError(error) {
     if (!error.response) {
@@ -39,14 +65,17 @@ function normalizeError(error) {
     return { status, title, message, code, details, raw: error };
 }
 
-export function unwrapSuccess(enveloped) {
-    // ожидаем { success: true, data: ... }
-    if (enveloped && enveloped.success) return enveloped.data;
-    // если вдруг без конверта (например, GET отдаёт просто массив)
-    return enveloped;
-}
-
 http.interceptors.response.use(
     (response) => response.data,
-    (error) => Promise.reject(normalizeError(error))
+    (error) => {
+        error = normalizeError(error);
+    
+        if (error.status === 401 || error.status == 403) {
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+            router.push("/login");
+        }
+    
+        return Promise.reject(new ApiError(error));
+    }
 );

@@ -28,6 +28,8 @@ export function useTransactions() {
     const messageOk = ref(null);
     const page = ref( Number(route.query.page ?? 1) );
     const size = ref( Number(route.query.size ?? 3) );
+    const summaryType = ref( '' );
+    const summaryAmount = ref( Number(0) );
     const totalPages = ref( Number(0) );
     const totalElements = ref( Number(0) );
     
@@ -41,7 +43,7 @@ export function useTransactions() {
         messageOk.value = false;
     }
     
-    async function load(pageArg = 1, sizeArg = 20) {
+    async function load(pageArg = 1, sizeArg = 20, filter = {}) {
         loading.value = true;
         error.value = null;
         try {
@@ -53,12 +55,14 @@ export function useTransactions() {
                 selectAccountId.value = accounts.value[0].id;
             }
             if (accounts.value.length) {
-                const data = await listTransactions(pageArg, sizeArg);
+                const data = await listTransactions(pageArg, sizeArg, filter);
                 transactions.value = data.content || [];
                 page.value = data.number + 1;
                 size.value = data.size;
                 totalPages.value = data.totalPages;
                 totalElements.value = data.totalElements;
+                summaryType.value = data?.meta?.sum?.type ?? '';
+                summaryAmount.value = data?.meta?.sum?.sum ?? '';
             }
         } catch (e) {
             console.error(e);
@@ -73,7 +77,6 @@ export function useTransactions() {
         try {
             await createTransaction(payload);
             showOk('Транзакция добавлена');
-            await load();
         } catch (e) {
             console.error(e);
             showErr('Не удалось добавить транзакцию');
@@ -84,7 +87,6 @@ export function useTransactions() {
         try {
             await updateTransaction(id, payload);
             showOk('Транзакция обновлена');
-            await load();
         } catch (e) {
             console.error(e);
             showErr('Не удалось обновить транзакцию');
@@ -95,7 +97,6 @@ export function useTransactions() {
         try {
             await deleteTransaction(id);
             showOk('Транзакция удалена');
-            await load();
         } catch (e) {
             console.error(e);
             showErr('Не удалось удалить транзакцию');
@@ -125,6 +126,8 @@ export function useTransactions() {
         size,
         totalPages,
         totalElements,
+        summaryAmount,
+        summaryType,
         load,
         addTransaction,
         updateTransactionById,

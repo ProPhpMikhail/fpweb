@@ -52,7 +52,7 @@
 import { computed } from "vue";
 
 const props = defineProps({
-  page: Number,          // 1..totalPages
+  page: Number,
   totalPages: Number,
   totalElements: Number,
 });

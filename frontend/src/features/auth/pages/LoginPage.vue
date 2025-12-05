@@ -51,6 +51,7 @@ async function onSubmit() {
   loading.value = true;
   try {
     await login(email.value, password.value);
+    console.log('redirect');
     const redirect = route.query.redirect || '/transactions';
     router.push(redirect);
   } catch (e) {

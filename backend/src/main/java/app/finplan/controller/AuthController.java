@@ -11,6 +11,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.security.Principal;
+
 @RestController
 @RequestMapping("/api/auth")
 @RequiredArgsConstructor
@@ -41,6 +43,11 @@ public class AuthController {
     @PostMapping("/login")
     public ResponseEntity<ApiResponse<AuthResponse>> login(@RequestBody LoginRequest request) {
         return ResponseEntity.ok(ApiResponse.ok(authService.login(request)));
+    }
+
+    @GetMapping("/valid")
+    public ResponseEntity<ApiResponse<Boolean>> valid(Principal principal) {
+        return ResponseEntity.ok(ApiResponse.ok(principal.getName().isBlank()));
     }
 
     @PostMapping("/mail")
